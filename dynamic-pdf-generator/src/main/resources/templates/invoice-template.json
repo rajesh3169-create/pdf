@@ -1,0 +1,216 @@
+{
+  "templateId": "invoice-001",
+  "templateName": "Standard Invoice Template",
+  "pageSettings": {
+    "size": "A4",
+    "marginTop": 50,
+    "marginBottom": 50,
+    "marginLeft": 40,
+    "marginRight": 40,
+    "orientation": "PORTRAIT"
+  },
+  "elements": [
+    {
+      "type": "HEADER",
+      "id": "company-header",
+      "content": "{{companyName}}",
+      "position": {
+        "alignment": "CENTER"
+      },
+      "style": {
+        "fontSize": 24,
+        "fontColor": "#2C3E50",
+        "bold": true
+      }
+    },
+    {
+      "type": "TEXT",
+      "id": "invoice-title",
+      "content": "INVOICE",
+      "position": {
+        "alignment": "CENTER"
+      },
+      "style": {
+        "fontSize": 18,
+        "fontColor": "#34495E",
+        "bold": true
+      }
+    },
+    {
+      "type": "PARAGRAPH",
+      "id": "invoice-details",
+      "content": "Invoice Number: {{invoiceNumber}}\nDate: {{invoiceDate}}\nDue Date: {{dueDate}}",
+      "position": {
+        "alignment": "LEFT"
+      },
+      "style": {
+        "fontSize": 11,
+        "fontColor": "#2C3E50",
+        "lineHeight": 1.5
+      }
+    },
+    {
+      "type": "TEXT",
+      "id": "bill-to-header",
+      "content": "Bill To:",
+      "position": {
+        "alignment": "LEFT"
+      },
+      "style": {
+        "fontSize": 14,
+        "fontColor": "#2C3E50",
+        "bold": true
+      }
+    },
+    {
+      "type": "PARAGRAPH",
+      "id": "customer-details",
+      "content": "{{customerName}}\n{{customerAddress}}\n{{customerCity}}, {{customerState}} {{customerZip}}",
+      "position": {
+        "alignment": "LEFT"
+      },
+      "style": {
+        "fontSize": 11,
+        "fontColor": "#2C3E50",
+        "lineHeight": 1.5
+      }
+    },
+    {
+      "type": "TABLE",
+      "id": "items-table",
+      "content": {
+        "headers": ["Item", "Description", "Quantity", "Unit Price", "Total"],
+        "rows": [],
+        "tableStyle": {
+          "headerStyle": {
+            "fontSize": 11,
+            "fontColor": "#FFFFFF",
+            "backgroundColor": "#3498DB",
+            "bold": true,
+            "padding": 8
+          },
+          "rowStyle": {
+            "fontSize": 10,
+            "fontColor": "#2C3E50",
+            "padding": 6
+          },
+          "alternateRowStyle": {
+            "fontSize": 10,
+            "fontColor": "#2C3E50",
+            "backgroundColor": "#ECF0F1",
+            "padding": 6
+          },
+          "showBorders": true,
+          "borderWidth": 0.5
+        }
+      },
+      "properties": {
+        "dataSource": "items"
+      },
+      "position": {
+        "width": 550
+      }
+    },
+    {
+      "type": "TEXT",
+      "id": "subtotal-label",
+      "content": "Subtotal:",
+      "position": {
+        "alignment": "RIGHT"
+      },
+      "style": {
+        "fontSize": 12,
+        "fontColor": "#2C3E50",
+        "bold": true
+      }
+    },
+    {
+      "type": "NUMBER",
+      "id": "subtotal-value",
+      "content": "{{subtotal}}",
+      "position": {
+        "alignment": "RIGHT"
+      },
+      "style": {
+        "fontSize": 12,
+        "fontColor": "#2C3E50"
+      },
+      "properties": {
+        "format": "#,##0.00",
+        "prefix": "$"
+      }
+    },
+    {
+      "type": "TEXT",
+      "id": "tax-label",
+      "content": "Tax ({{taxRate}}%):",
+      "position": {
+        "alignment": "RIGHT"
+      },
+      "style": {
+        "fontSize": 12,
+        "fontColor": "#2C3E50",
+        "bold": true
+      }
+    },
+    {
+      "type": "NUMBER",
+      "id": "tax-value",
+      "content": "{{taxAmount}}",
+      "position": {
+        "alignment": "RIGHT"
+      },
+      "style": {
+        "fontSize": 12,
+        "fontColor": "#2C3E50"
+      },
+      "properties": {
+        "format": "#,##0.00",
+        "prefix": "$"
+      }
+    },
+    {
+      "type": "TEXT",
+      "id": "total-label",
+      "content": "Total Amount:",
+      "position": {
+        "alignment": "RIGHT"
+      },
+      "style": {
+        "fontSize": 14,
+        "fontColor": "#2C3E50",
+        "bold": true
+      }
+    },
+    {
+      "type": "NUMBER",
+      "id": "total-value",
+      "content": "{{totalAmount}}",
+      "position": {
+        "alignment": "RIGHT"
+      },
+      "style": {
+        "fontSize": 14,
+        "fontColor": "#27AE60",
+        "bold": true
+      },
+      "properties": {
+        "format": "#,##0.00",
+        "prefix": "$"
+      }
+    },
+    {
+      "type": "FOOTER",
+      "id": "footer-text",
+      "content": "Thank you for your business! | Page {{pageNumber}}",
+      "position": {
+        "alignment": "CENTER"
+      },
+      "style": {
+        "fontSize": 9,
+        "fontColor": "#7F8C8D",
+        "italic": true
+      }
+    }
+  ]
+}
