@@ -1,14 +1,8 @@
 
-// ============================================
-// PdfGenerationRequest.java
-// ============================================
+// File: model/PdfGenerationRequest.java
 package com.cg.pdfgenerator.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import lombok.*;
 import java.util.Map;
 
 @Data
@@ -17,6 +11,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class PdfGenerationRequest {
     private String templateId;
-    private Map<String, Object> data; // Dynamic data to populate template
+    private Map<String, Object> data;
     private String outputFileName;
 }
+

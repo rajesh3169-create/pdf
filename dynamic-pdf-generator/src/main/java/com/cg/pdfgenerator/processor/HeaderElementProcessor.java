@@ -1,3 +1,5 @@
+
+// File: processor/HeaderElementProcessor.java
 package com.cg.pdfgenerator.processor;
 
 import com.cg.pdfgenerator.model.PdfTemplate;
@@ -15,12 +17,11 @@ public class HeaderElementProcessor extends BaseElementProcessor {
         String content = resolveContent(element.getContent(), data);
         
         Paragraph header = new Paragraph(content);
+        header.setFont(PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD));
         
-        // Default header style with bold font
         float fontSize = element.getStyle() != null && element.getStyle().getFontSize() != null 
             ? element.getStyle().getFontSize() : 18f;
         header.setFontSize(fontSize);
-        header.setFont(PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD));
         
         if (element.getPosition() != null) {
             if (element.getPosition().getAlignment() != null) {

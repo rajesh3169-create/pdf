@@ -1,3 +1,5 @@
+// ============================= APPLICATION MAIN CLASS =============================
+// File: DynamicPdfGeneratorApplication.java
 package com.cg.pdfgenerator;
 
 import org.springframework.boot.SpringApplication;

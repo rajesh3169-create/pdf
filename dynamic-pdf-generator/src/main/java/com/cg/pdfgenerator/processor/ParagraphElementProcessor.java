@@ -1,4 +1,5 @@
 
+// File: processor/ParagraphElementProcessor.java
 package com.cg.pdfgenerator.processor;
 
 import com.cg.pdfgenerator.model.PdfTemplate;
@@ -28,7 +29,7 @@ public class ParagraphElementProcessor extends BaseElementProcessor {
             paragraph.setMultipliedLeading(element.getStyle().getLineHeight());
         }
         
-        applyStyle(paragraph, element.getStyle(), content);  // Now has 3 parameters
+        applyStyle(paragraph, element.getStyle(), content);
         
         document.add(paragraph);
     }

@@ -1,9 +1,10 @@
+
+// ============================= MODELS =============================
+// File: model/PdfTemplate.java
 package com.cg.pdfgenerator.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
 
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,7 @@ public class PdfTemplate {
         private String id;
         private Position position;
         private Style style;
-        private Object content; // Can be String, TableContent, etc.
+        private Object content;
         private Map<String, Object> properties;
     }
     
@@ -53,8 +54,8 @@ public class PdfTemplate {
         private Float y;
         private Float width;
         private Float height;
-        private String alignment; // LEFT, CENTER, RIGHT, JUSTIFY
-        private String verticalAlignment; // TOP, MIDDLE, BOTTOM
+        private String alignment;
+        private String verticalAlignment;
     }
     
     @Data
@@ -93,7 +94,7 @@ public class PdfTemplate {
         private Style headerStyle;
         private Style rowStyle;
         private Style alternateRowStyle;
-        private Float columnWidths[];
+        private Float[] columnWidths;
         private Boolean showBorders;
         private Float borderWidth;
     }

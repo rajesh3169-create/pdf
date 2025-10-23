@@ -1,3 +1,5 @@
+
+// File: processor/FooterElementProcessor.java
 package com.cg.pdfgenerator.processor;
 
 import com.cg.pdfgenerator.model.PdfTemplate;
@@ -12,14 +14,8 @@ public class FooterElementProcessor extends BaseElementProcessor {
     public void process(Document document, PdfTemplate.Element element, Map<String, Object> data) throws Exception {
         String content = resolveContent(element.getContent(), data);
         
-        // Support for page numbers
-        if (content.contains("{{pageNumber}}")) {
-            content = content.replace("{{pageNumber}}", String.valueOf(document.getPdfDocument().getNumberOfPages()));
-        }
-        
         Paragraph footer = new Paragraph(content);
         
-        // Default footer style
         float fontSize = element.getStyle() != null && element.getStyle().getFontSize() != null 
             ? element.getStyle().getFontSize() : 10f;
         footer.setFontSize(fontSize);
@@ -33,7 +29,7 @@ public class FooterElementProcessor extends BaseElementProcessor {
             }
         }
         
-        applyStyle(footer, element.getStyle(), content);  // Now has 3 parameters
+        applyStyle(footer, element.getStyle(), content);
         
         document.add(footer);
     }

@@ -1,69 +1,133 @@
 
+// File: processor/TableElementProcessor.java
 package com.cg.pdfgenerator.processor;
 
 import com.cg.pdfgenerator.model.PdfTemplate;
-import com.itextpdf.io.image.ImageDataFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itextpdf.layout.Document;
-import com.itextpdf.layout.element.Image;
-import com.itextpdf.layout.properties.HorizontalAlignment;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.properties.UnitValue;
 
-import java.io.File;
-import java.util.Base64;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
-public class ImageElementProcessor extends BaseElementProcessor {
+public class TableElementProcessor extends BaseElementProcessor {
+    
+    private final ObjectMapper objectMapper = new ObjectMapper();
     
     @Override
     public void process(Document document, PdfTemplate.Element element, Map<String, Object> data) throws Exception {
-        String imagePath = resolveContent(element.getContent(), data);
+        PdfTemplate.TableContent tableContent;
         
-        Image image;
-        
-        // Check if it's a base64 encoded image
-        if (imagePath.startsWith("data:image")) {
-            String base64Data = imagePath.substring(imagePath.indexOf(",") + 1);
-            byte[] imageBytes = Base64.getDecoder().decode(base64Data);
-            image = new Image(ImageDataFactory.create(imageBytes));
-        } else if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
-            // URL image
-            image = new Image(ImageDataFactory.create(imagePath));
+        if (element.getContent() instanceof Map) {
+            tableContent = objectMapper.convertValue(element.getContent(), PdfTemplate.TableContent.class);
         } else {
-            // File path
-            File imageFile = new File(imagePath);
-            if (!imageFile.exists()) {
-                throw new IllegalArgumentException("Image file not found: " + imagePath);
-            }
-            image = new Image(ImageDataFactory.create(imagePath));
+            throw new IllegalArgumentException("Table content must be a valid TableContent object");
         }
         
-        // Apply dimensions
-        if (element.getPosition() != null) {
-            if (element.getPosition().getWidth() != null) {
-                image.setWidth(element.getPosition().getWidth());
-            }
-            if (element.getPosition().getHeight() != null) {
-                image.setHeight(element.getPosition().getHeight());
-            }
+        if (element.getProperties() != null && element.getProperties().containsKey("dataSource")) {
+            String dataSource = element.getProperties().get("dataSource").toString();
+            Object tableData = data.get(dataSource);
             
-            // Set alignment
-            if (element.getPosition().getAlignment() != null) {
-                HorizontalAlignment alignment = switch (element.getPosition().getAlignment().toUpperCase()) {
-                    case "CENTER" -> HorizontalAlignment.CENTER;
-                    case "RIGHT" -> HorizontalAlignment.RIGHT;
-                    default -> HorizontalAlignment.LEFT;
-                };
-                image.setHorizontalAlignment(alignment);
+            if (tableData instanceof List) {
+                tableContent = buildTableFromDataSource((List<?>) tableData, tableContent);
             }
         }
         
-        // Apply auto-scaling if properties contain it
-        if (element.getProperties() != null && element.getProperties().containsKey("autoScale")) {
-            Boolean autoScale = (Boolean) element.getProperties().get("autoScale");
-            if (autoScale) {
-                image.setAutoScale(true);
+        int numColumns = tableContent.getHeaders() != null ? tableContent.getHeaders().size() : 
+                        (tableContent.getRows() != null && !tableContent.getRows().isEmpty() ? 
+                         tableContent.getRows().get(0).size() : 1);
+        
+        Table table;
+        
+        if (tableContent.getTableStyle() != null && tableContent.getTableStyle().getColumnWidths() != null) {
+            Float[] widths = tableContent.getTableStyle().getColumnWidths();
+            float[] columnWidths = new float[widths.length];
+            for (int i = 0; i < widths.length; i++) {
+                columnWidths[i] = widths[i];
+            }
+            table = new Table(UnitValue.createPercentArray(columnWidths));
+        } else {
+            table = new Table(numColumns);
+        }
+        
+        if (element.getPosition() != null && element.getPosition().getWidth() != null) {
+            table.setWidth(UnitValue.createPointValue(element.getPosition().getWidth()));
+        } else {
+            table.setWidth(UnitValue.createPercentValue(100));
+        }
+        
+        if (tableContent.getHeaders() != null) {
+            for (String header : tableContent.getHeaders()) {
+                String resolvedHeader = resolveContent(header, data);
+                Cell cell = new Cell().add(new Paragraph(resolvedHeader));
+                
+                if (tableContent.getTableStyle() != null && tableContent.getTableStyle().getHeaderStyle() != null) {
+                    applyCellStyle(cell, tableContent.getTableStyle().getHeaderStyle());
+                }
+                
+                table.addHeaderCell(cell);
             }
         }
         
-        document.add(image);
+        if (tableContent.getRows() != null) {
+            boolean alternate = false;
+            for (List<String> row : tableContent.getRows()) {
+                for (String cellValue : row) {
+                    String resolvedValue = resolveContent(cellValue, data);
+                    Cell cell = new Cell().add(new Paragraph(resolvedValue));
+                    
+                    if (tableContent.getTableStyle() != null) {
+                        PdfTemplate.Style cellStyle = alternate && tableContent.getTableStyle().getAlternateRowStyle() != null
+                            ? tableContent.getTableStyle().getAlternateRowStyle()
+                            : tableContent.getTableStyle().getRowStyle();
+                        
+                        if (cellStyle != null) {
+                            applyCellStyle(cell, cellStyle);
+                        }
+                    }
+                    
+                    table.addCell(cell);
+                }
+                alternate = !alternate;
+            }
+        }
+        
+        document.add(table);
     }
-}
+
+    private PdfTemplate.TableContent buildTableFromDataSource(List<?> dataList, 
+                                                               PdfTemplate.TableContent templateContent) {
+        if (dataList.isEmpty()) {
+            return templateContent;
+        }
+        
+        List<List<String>> rows = new ArrayList<>();
+        
+        for (Object item : dataList) {
+            if (item instanceof Map) {
+                Map<?, ?> rowMap = (Map<?, ?>) item;
+                List<String> row = new ArrayList<>();
+                
+                if (templateContent.getHeaders() != null) {
+                    for (String header : templateContent.getHeaders()) {
+                        Object value = rowMap.get(header);
+                        row.add(value != null ? value.toString() : "");
+                    }
+                } else {
+                    for (Object value : rowMap.values()) {
+                        row.add(value != null ? value.toString() : "");
+                    }
+                }
+                
+                rows.add(row);
+            }
+        }
+        
+        templateContent.setRows(rows);
+        return templateContent;
+    }
+} 

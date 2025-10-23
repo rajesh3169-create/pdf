@@ -1,4 +1,5 @@
 
+// File: processor/NumberElementProcessor.java
 package com.cg.pdfgenerator.processor;
 
 import com.cg.pdfgenerator.model.PdfTemplate;
@@ -14,7 +15,6 @@ public class NumberElementProcessor extends BaseElementProcessor {
     public void process(Document document, PdfTemplate.Element element, Map<String, Object> data) throws Exception {
         String content = resolveContent(element.getContent(), data);
         
-        // Format number if format pattern is provided
         String formattedContent = content;
         if (element.getProperties() != null && element.getProperties().containsKey("format")) {
             try {
@@ -23,11 +23,10 @@ public class NumberElementProcessor extends BaseElementProcessor {
                 DecimalFormat df = new DecimalFormat(format);
                 formattedContent = df.format(number);
             } catch (Exception e) {
-                // If formatting fails, use original content
+                // Use original if formatting fails
             }
         }
         
-        // Add prefix/suffix if provided
         if (element.getProperties() != null) {
             String prefix = (String) element.getProperties().get("prefix");
             String suffix = (String) element.getProperties().get("suffix");
@@ -39,8 +38,7 @@ public class NumberElementProcessor extends BaseElementProcessor {
                 formattedContent = formattedContent + suffix;
             }
         }
-        
-        Paragraph paragraph = new Paragraph(formattedContent);
+        Paragraph paragraph = new Paragraph(content);
         
         if (element.getPosition() != null) {
             if (element.getPosition().getAlignment() != null) {
@@ -51,7 +49,7 @@ public class NumberElementProcessor extends BaseElementProcessor {
             }
         }
         
-        applyStyle(paragraph, element.getStyle(), formattedContent);  // Now has 3 parameters
+        applyStyle(paragraph, element.getStyle(), content);
         
         document.add(paragraph);
     }

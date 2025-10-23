@@ -1,3 +1,5 @@
+
+// File: service/PdfGeneratorService.java
 package com.cg.pdfgenerator.service;
 
 import com.cg.pdfgenerator.model.PdfGenerationRequest;
@@ -7,6 +9,7 @@ import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -15,76 +18,56 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class PdfGeneratorService {
     
-    private final TemplateService templateService;
-    private final MultiLanguagePdfService multiLanguagePdfService;
+    private final TemplateStore templateStore;
     private final Map<String, ElementProcessor> processors = new HashMap<>();
     
-    // Single constructor with both dependencies
-    public PdfGeneratorService(TemplateService templateService, 
-                               MultiLanguagePdfService multiLanguagePdfService) {
-        this.templateService = templateService;
-        this.multiLanguagePdfService = multiLanguagePdfService;
+    public PdfGeneratorService(TemplateStore templateStore) {
+        this.templateStore = templateStore;
         initializeProcessors();
     }
     
     private void initializeProcessors() {
-        // Initialize all processors with multi-language support
-        TextElementProcessor textProcessor = new TextElementProcessor();
-        textProcessor.setMultiLanguagePdfService(multiLanguagePdfService);
-        processors.put("TEXT", textProcessor);
-        
-        ParagraphElementProcessor paragraphProcessor = new ParagraphElementProcessor();
-        paragraphProcessor.setMultiLanguagePdfService(multiLanguagePdfService);
-        processors.put("PARAGRAPH", paragraphProcessor);
-        
-        NumberElementProcessor numberProcessor = new NumberElementProcessor();
-        numberProcessor.setMultiLanguagePdfService(multiLanguagePdfService);
-        processors.put("NUMBER", numberProcessor);
-        
-        ImageElementProcessor imageProcessor = new ImageElementProcessor();
-        imageProcessor.setMultiLanguagePdfService(multiLanguagePdfService);
-        processors.put("IMAGE", imageProcessor);
-        
-        TableElementProcessor tableProcessor = new TableElementProcessor();
-        tableProcessor.setMultiLanguagePdfService(multiLanguagePdfService);
-        processors.put("TABLE", tableProcessor);
-        
-        HeaderElementProcessor headerProcessor = new HeaderElementProcessor();
-        headerProcessor.setMultiLanguagePdfService(multiLanguagePdfService);
-        processors.put("HEADER", headerProcessor);
-        
-        FooterElementProcessor footerProcessor = new FooterElementProcessor();
-        footerProcessor.setMultiLanguagePdfService(multiLanguagePdfService);
-        processors.put("FOOTER", footerProcessor);
+        processors.put("TEXT", new TextElementProcessor());
+        processors.put("PARAGRAPH", new ParagraphElementProcessor());
+        processors.put("NUMBER", new NumberElementProcessor());
+        processors.put("IMAGE", new ImageElementProcessor());
+        processors.put("TABLE", new TableElementProcessor());
+        processors.put("HEADER", new HeaderElementProcessor());
+        processors.put("FOOTER", new FooterElementProcessor());
     }
     
     public byte[] generatePdf(PdfGenerationRequest request) throws Exception {
         log.info("Generating PDF for template: {}", request.getTemplateId());
         
-        PdfTemplate template = templateService.getTemplate(request.getTemplateId());
+        PdfTemplate template = templateStore.getTemplate(request.getTemplateId());
+        Map<String, Object> data = request.getData() != null ? request.getData() : new HashMap<>();
         
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             PdfWriter writer = new PdfWriter(baos);
             PdfDocument pdfDoc = new PdfDocument(writer);
             
-            // Apply page settings
             applyPageSettings(pdfDoc, template.getPageSettings());
             
             Document document = new Document(pdfDoc);
             applyMargins(document, template.getPageSettings());
             
-            // Process each element in the template
-            for (PdfTemplate.Element element : template.getElements()) {
-                processElement(document, element, request.getData());
+            if (template.getElements() != null) {
+                for (PdfTemplate.Element element : template.getElements()) {
+                    processElement(document, element, data);
+                }
             }
             
             document.close();
             log.info("PDF generated successfully");
             
             return baos.toByteArray();
+        } catch (Exception e) {
+            log.error("Error generating PDF", e);
+            throw e;
         }
     }
     
@@ -126,7 +109,6 @@ public class PdfGeneratorService {
             case "A3" -> PageSize.A3;
             case "A5" -> PageSize.A5;
             case "TABLOID" -> PageSize.TABLOID;
-            case "EXECUTIVE" -> PageSize.EXECUTIVE;
             default -> PageSize.A4;
         };
     }
