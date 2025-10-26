@@ -16,30 +16,25 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class PdfGeneratorService {
-    
+
     private final TemplateStore templateStore;
     private final Map<String, ElementProcessor> processors = new HashMap<>();
-    
-    public PdfGeneratorService(TemplateStore templateStore) {
-        this.templateStore = templateStore;
-        initializeProcessors();
-    }
-    
+
+    @jakarta.annotation.PostConstruct
     private void initializeProcessors() {
         processors.put("TEXT", new TextElementProcessor());
         processors.put("PARAGRAPH", new ParagraphElementProcessor());
         processors.put("NUMBER", new NumberElementProcessor());
+        processors.put("TABLE", new TableElementProcessor());  // ← FIXED: Added TableElementProcessor
+
         processors.put("IMAGE", new ImageElementProcessor());
-        processors.put("TABLE", new TableElementProcessor());
         processors.put("HEADER", new HeaderElementProcessor());
         processors.put("FOOTER", new FooterElementProcessor());
     }
-    
     public byte[] generatePdf(PdfGenerationRequest request) throws Exception {
         log.info("Generating PDF for template: {}", request.getTemplateId());
         

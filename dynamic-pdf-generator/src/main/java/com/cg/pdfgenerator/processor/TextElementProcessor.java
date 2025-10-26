@@ -1,5 +1,3 @@
-// ============================= SPECIFIC PROCESSORS =============================
-// File: processor/TextElementProcessor.java
 package com.cg.pdfgenerator.processor;
 
 import com.cg.pdfgenerator.model.PdfTemplate;
@@ -14,7 +12,7 @@ public class TextElementProcessor extends BaseElementProcessor {
     public void process(Document document, PdfTemplate.Element element, Map<String, Object> data) throws Exception {
         String content = resolveContent(element.getContent(), data);
         
-        Paragraph paragraph = new Paragraph(formattedContent);
+        Paragraph paragraph = new Paragraph(content);
         
         if (element.getPosition() != null) {
             if (element.getPosition().getAlignment() != null) {
@@ -25,8 +23,8 @@ public class TextElementProcessor extends BaseElementProcessor {
             }
         }
         
-        applyStyle(paragraph, element.getStyle(), formattedContent);
+        applyStyle(paragraph, element.getStyle(), content);
         
         document.add(paragraph);
     }
-}
+} 
