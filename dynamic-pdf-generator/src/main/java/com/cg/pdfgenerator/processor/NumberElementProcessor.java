@@ -1,5 +1,3 @@
-
-// File: processor/NumberElementProcessor.java
 package com.cg.pdfgenerator.processor;
 
 import com.cg.pdfgenerator.model.PdfTemplate;
@@ -38,7 +36,8 @@ public class NumberElementProcessor extends BaseElementProcessor {
                 formattedContent = formattedContent + suffix;
             }
         }
-        Paragraph paragraph = new Paragraph(content);
+        
+        Paragraph paragraph = new Paragraph(formattedContent);
         
         if (element.getPosition() != null) {
             if (element.getPosition().getAlignment() != null) {
@@ -49,7 +48,7 @@ public class NumberElementProcessor extends BaseElementProcessor {
             }
         }
         
-        applyStyle(paragraph, element.getStyle(), content);
+        applyStyle(paragraph, element.getStyle(), formattedContent);
         
         document.add(paragraph);
     }
